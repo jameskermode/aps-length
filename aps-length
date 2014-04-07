@@ -170,7 +170,7 @@ def count_figures_words(detex_lines, tex_lines, opts):
     return sum(fig_words)
 
 def process(tex_file, opts):
-    print 'Processing TeX file: %s' % tex_file
+    print 'Processing TeX file: %s\n' % tex_file
     detex = subprocess.Popen(['detex', '-e', opts.env, tex_file],
                              stdout=subprocess.PIPE)
     out, err = detex.communicate()
