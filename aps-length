@@ -162,7 +162,7 @@ def count_figures_words(detex_lines, tex_lines, opts):
         else:
             words_equiv = 150./aspect + 20.
         
-        print 'Figure %d:   %6d words (%.1fx%.1f aspect %.2f, %s)' % (fig_i+1, int(words_equiv),
+        print 'Figure %d:   %6d words (%.0fx%.0f aspect %.2f, %s)' % (fig_i+1, int(words_equiv),
                                                                       width, height,
                                                                       aspect, filename)
         fig_words.append(words_equiv)
@@ -192,14 +192,14 @@ def process(tex_file, opts):
     print 'TOTAL:          %6d words' % total_words
     print
     wl = word_limit[opts.journal]
-    print '%-6s limit %6d words' % (opts.journal, wl)
     if total_words > wl:
         over_under = 'OVER'
-    elif total_words == wl:
-        over_under = 'exactly on the'
     else:
-        over_under = 'INSIDE'
-    print '%6d words (%.0f%%) %s limit' % (abs(total_words - wl), float(total_words - wl)/wl*100., over_under)
+        over_under = 'UNDER'
+    print ('Manuscript %s is currently %d words (%.0f%%) %s limit of %d words for journal %s' %
+           (tex_file, abs(total_words - wl),
+            float(total_words - wl)/wl*100., over_under,
+            wl, opts.journal))
 
 
 parser = optparse.OptionParser(usage='%prog [options] tex-files',
