@@ -5,8 +5,11 @@ aps-length
 
 Usage: aps-length [options] tex-files
 
-Count length of an APS manuscript formatted in LaTeX, following guidelines
-described at http://journals.aps.org/authors/length-guide
+Count number of equivalent words in an APS manuscript formatted in
+LaTeX, following guidelines described at http://journals.aps.org/authors/length-guide
+
+Requires _detex_ (http://www.ctan.org/pkg/detex) and ImageMagick
+_identify_ (http://www.imagemagick.org) to be available on your path.
 
 Options:
 
