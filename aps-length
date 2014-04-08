@@ -22,7 +22,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 """
 
 import glob
-import os
 import optparse
 import sys
 import subprocess
@@ -157,12 +156,26 @@ def count_figures_words(detex_lines, tex_lines, opts):
         else:
             raise IOError('missing picture file %s' % filename)
         filename = filename+ext
-                
-        identify_output = os.popen('identify %s' % filename).read()
-        fields = identify_output.split()
-        width, height = fields[2].split('x')
-        width = float(width)
-        height = float(height)
+
+        if opts.figs == 'identify':
+            identify = subprocess.Popen(['identify', filename],
+                                        stdout=subprocess.PIPE)
+            out, err = identify.communicate()
+            fields = out.split()
+            width, height = fields[2].split('x')
+            width = float(width)
+            height = float(height)
+        elif opts.figs == 'gs':
+            img_f = open(filename, 'r')
+            gs = subprocess.Popen(['gs', '-q', '-dSAFER', '-dBATCH', '-sDEVICE=bbox', '-'],
+                                  stdin=img_f, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            out, err = gs.communicate()
+            img_f.close()
+            bbox = err.split('\n')[0].split()
+            width = float(bbox[3])
+            height = float(bbox[4])
+        else:
+            raise ValueError('Unknown figure method "%s"' % opts.figs)
 
         #if fig_line_no not in figs:
         #    figs[fig_line_no] = (fig_i, two_column, [(width, height, newline, filename)])
@@ -226,6 +239,9 @@ parser.add_option('-v', '--var', metavar='key value', nargs=2, action='append',
 parser.add_option('-e', '--env', metavar='env1,env2,...',
                 help='Comma-separated list of LaTeX environments to ignore.',
                 default='abstract,acknowledgements,displaymath,equation,eqnarray')
+parser.add_option('-f', '--figs', metavar='[identify|gs]',
+                  help='Tool to use to extrat bounding box from figure',
+                  default='gs')
 parser.add_option('-j', '--journal', metavar='PRL', default='PRL',
                   help='Journal abbreviation (e.g. PRL, PRB-RC)')
 
