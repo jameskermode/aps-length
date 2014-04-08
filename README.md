@@ -8,8 +8,9 @@ Usage: aps-length [options] tex-files
 Count number of equivalent words in an APS manuscript formatted in
 LaTeX, following guidelines described at http://journals.aps.org/authors/length-guide
 
-Requires _detex_ (http://www.ctan.org/pkg/detex) and ImageMagick
-_identify_ (http://www.imagemagick.org) to be available on your path.
+Requires _detex_ (http://www.ctan.org/pkg/detex) and either
+_ghostscript_ (http://www.ghostscript.com/) or ImageMagick _identify_
+(http://www.imagemagick.org) to be available on your path.
 
 Options:
 
@@ -19,6 +20,9 @@ Options:
                           figure files.
     -e env1,env2,..., --env=env1,env2,...
                           Comma-separated list of LaTeX environments to ignore.
+    -f (identify | gs), --figs=(identify | gs)
+                          Tool to use to extract bounding box from figure.
+                          Default is gs, ImageMagick identify also supported.
     -j PRL, --journal=PRL
-                          Journal abbreviation (e.g. PRL, PRB-RC)
+                        Journal abbreviation (e.g. PRL, PRB-RC)
 

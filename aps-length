@@ -239,8 +239,9 @@ parser.add_option('-v', '--var', metavar='key value', nargs=2, action='append',
 parser.add_option('-e', '--env', metavar='env1,env2,...',
                 help='Comma-separated list of LaTeX environments to ignore.',
                 default='abstract,acknowledgements,displaymath,equation,eqnarray')
-parser.add_option('-f', '--figs', metavar='[identify|gs]',
-                  help='Tool to use to extrat bounding box from figure',
+parser.add_option('-f', '--figs', metavar='(identify | gs)',
+                  help='''Tool to use to extract bounding box from figure.
+                  Default is gs, ImageMagick identify also supported.''',
                   default='gs')
 parser.add_option('-j', '--journal', metavar='PRL', default='PRL',
                   help='Journal abbreviation (e.g. PRL, PRB-RC)')
