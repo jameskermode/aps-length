@@ -134,8 +134,9 @@ def count_figures_words(detex_lines, tex_lines, opts):
     
     for fig_i, fig_line in enumerate(fig_lines):
         filename = fig_line.strip()[1:-1].split()[1]
-
-        inc_fig_line_no, = [ i for i, line in enumerate(tex_lines) if filename in line]
+        this_fig_lines = [ (i, line) for i, line in enumerate(tex_lines) if filename in line and
+                           ('input' in line or 'includegraphics' in line)]
+        (inc_fig_line_no, inc_fig_line), = this_fig_lines
         fig_line_no = inc_fig_line_no
         while r'\begin{figure' not in tex_lines[fig_line_no]:
             fig_line_no -= 1
