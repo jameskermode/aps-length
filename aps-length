@@ -67,6 +67,7 @@ def count_main_text_words(detex_lines, tex_lines):
 def find_equation_lines(tex_lines):
     return [i for (i, line) in enumerate(tex_lines) if (r'\begin{equation' in line or
                                                         r'\begin{eqnarray' in line or
+                                                        r'\begin{align' in line or
                                                         r'\begin{displaymath' in line)]
 def count_equation_words(lines, start_line):
     count = 1
@@ -80,6 +81,7 @@ def count_equation_words(lines, start_line):
     for line in lines[start_line+1:]:
         if (r'\end{equation' in line or
             r'\end{eqnarray' in line or
+            r'\end{align' in line or
             r'\end{displaymath' in line):
             break
         if r'\\' in line and not array:
