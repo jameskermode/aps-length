@@ -518,7 +518,7 @@ parser.add_option('-v', '--var', metavar='key value', nargs=2, action='append',
                 help='Define TeX variables e.g. to specify location of figure files.')
 parser.add_option('-e', '--env', metavar='env1,env2,...',
                 help='Comma-separated list of LaTeX environments to ignore.',
-                default='abstract,acknowledgements,displaymath,equation,eqnarray')
+                default='abstract,acknowledgments,displaymath,equation,eqnarray')
 parser.add_option('-m', '--method', metavar='(detex | wordcount)', default='wordcount',
                   help='''Tool to use to count words in main text. Default is wordcount.
 detex is also supported (but tends to underestimate word count).''')
