@@ -23,6 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 import glob
 import optparse
+import os
 import sys
 import subprocess
 
@@ -35,6 +36,199 @@ word_limit = {'PRL': 3500,
               'PRApplied': 3500,
               'PRST-PER': 3500}
 
+wordcount_tex_contents = r"""\ProvidesFile{wordcount.tex}[2000/09/27 v1.5 Michael Downes]
+% Copyright 2000 Michael John Downes
+% This file has no restrictions on its use, distribution, or sale.
+%
+% If you run LaTeX on wordcount.tex it will prompt you for the name of a
+% document to be counted. For most people, however, it will be more
+% convenient to run the shell script wordcount.sh, giving the document
+% name as the first argument. The comments in wordcount.sh
+% give further information about the usage and limitations of this tool.
+
+% The fundamental idea is to mark each character and interword space
+% with a unique tag that will show up in TeX "showbox" output. Then
+% arrange to make the output routine trigger a TeX overfull vbox message
+% for the page box so that everything gets reported in the TeX log.
+% Then run grep -c (or an equivalent text search utility, e.g., perl) on
+% the log file to count the occurrences.
+%
+% In showbox output, a character is typically represented by a line of
+% the form
+%
+%   ...\T1/cmr/m/n/10 e
+%
+% where "\T1/cmr/m/n/10" is the font name. We arrange things so that all
+% characters are typeset in a font named "\3.08632". Furthermore, for
+% interword spaces, which are normally represented in the output as
+% something like
+%
+%   ...\glue 3.33333 plus 1.66666 minus 1.11111
+%
+% we use \spaceskip to ensure that it always appears as
+%
+%   ...\glue(\spaceskip) 3.08633 plus 9.0
+%
+% Then to count characters (including word spaces) we can
+% grep for lines matching "3.0863", while to count words we
+% count the number of lines in the log that match "3.08633" but not
+% "3.08632".
+%
+% For an accurate count in multi-line paragraphs we also need
+% to set rightskip to the flag value, since interword spaces are
+% discarded at line breaks; and on the presumption that hyphenated
+% compounds like "steady-state" should be counted as two words, we set
+% \exhyphenpenalty to a value that ensures a line break at *every*
+% explicit hyphen---then we will get a rightskip glue node between the
+% two parts. (How about em-dashes? you may ask. Answer: it works all
+% right, try it and see.)
+
+\ifx\relax\?\def\wcQUIET{TT}\else\def\wcQUIET{TF}\fi
+
+% We want accented letters to be represented by a single font char, to
+% the extent possible:
+\RequirePackage[T1]{fontenc}
+\makeatletter
+\thickmuskip=5.55555mu plus5.55555mu minus 2.22222mu
+\let\@@thickmuskip\thickmuskip \newmuskip\thickmuskip
+\let\@@spaceskip\spaceskip \xspaceskip=0pt
+\newskip\@charfontname
+% Ensure that these cannot be overridden.
+\let\spaceskip\@charfontname \let\xspaceskip\spaceskip
+\def\FreezeSpaces{%
+  \setbox\z@\hbox{\mathsurround=\z@ $\mkern\@@thickmuskip$}%
+  \@@spaceskip=\wd\z@ plus 9pt\relax
+  % Setting rightskip to a slightly different value means that
+  % end-of-line spaces can be distinguished if desired. (By default,
+  % they are not.) Using fil units means there won't be any hyphenation
+  % except for explicit hyphens.
+  \dimen@\@@spaceskip \advance\dimen@ 1sp\relax
+  \rightskip\z@ plus\strip@pt\dimen@ fil\relax
+  % Prevent any further changes to \rightskip.
+  \let\rightskip\spaceskip
+  \@charfontname=\wd\z@ \advance\@charfontname -1sp\relax
+  % Cancel all non-1000 sfcodes, which might otherwise affect the value
+  % of inter-sentence spaces and keep them from being counted as
+  % interword spaces.
+  \def\do{\sfcode\fam\@m \advance\fam\@ne
+    \ifnum\fam>\@cclv\expandafter\@gobble\fi \do
+  }%
+  \fam\z@ \do
+  \let\frenchspacing\relax \let\nonfrenchspacing\relax
+}
+\def\DashPatch{%
+  \exhyphenpenalty=-\@M \let\exhyphenpenalty\count@
+  \hyphenpenalty\@M \let\hyphenpenalty\count@
+  % LaTeX bug? Default definitions for these don't have \exhyphenpenalty
+  % built in. Change them to just print a hyphen so that the penalties
+  % will work.
+  \def\textemdash{-}\def\textendash{-}%
+}
+% Here we set the font to ptmr8t (a T1 encoded font for which most
+% people are likely to have a tfm file) and then make it difficult for
+% the font to be changed ever again. We use two names for the font,
+% \ptmr and \3.08632, the former being easier to use when resetting math
+% fonts. The name that is defined last when TeX processes a document is
+% the one that will be used in the log file.
+\def\FreezeFont{%
+  \expandafter\font
+    \csname\strip@pt\@charfontname\endcsname
+    =ptmr8t \relax
+  \ptmr
+  \check@mathfonts \let\check@mathfonts\relax
+  \def\do{%
+    \textfont\fam=\ptmr\scriptfont\fam=\ptmr\scriptscriptfont\fam=\ptmr
+    \advance\fam\@ne \ifnum\fam<\sixt@@n \else\expandafter\@gobble\fi
+    \do
+  }%
+  \fam=0 \do
+}
+\font\ptmr=ptmr8t \relax
+\fontdimen22\ptmr=1sp % to permit use as math font 2
+\let\selectfont\relax
+\let\fontshape\@gobble \let\fontseries\@gobble \let\fontfamily\@gobble 
+\let\fontencoding\@gobble \let\fontsize\@gobbletwo
+\let\linespread\@gobble 
+\let\try@load@fontshape\relax
+\@namedef{U/msa/m/n}{}% disable special test in AMS documentclasses
+\def\define@newfont{\expandafter\let\font@name=\ptmr}
+\let\@@hfuzz\hfuzz \let\@@vfuzz\vfuzz
+\newdimen\hfuzz \let\vfuzz\hfuzz
+\def\QuietBoxes{%
+  \@@hfuzz\maxdimen \@@vfuzz\maxdimen
+}
+\AtBeginDocument{\FreezeSpaces \FreezeFont \DashPatch \QuietBoxes}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Halign patches
+\def\ialign{\everycr{}\tabskip\@@spaceskip\halign} % initialized \halign
+\def\extracolsep#1{\tabskip\@@spaceskip}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\nofiles \let\makeindex\@empty % work-around for a natbib problem
+% Seize control of the output routine to avoid extra clutter of dvi
+% files. Handling \AtBeginDVI would take some extra work--for now I
+% won't bother.
+\def\showpagebox{%
+  \showboxbreadth\maxdimen\showboxdepth99
+  % This is a devious way of getting the box contents into the log file
+  % without actually using \showbox (which typically results in a
+  % nonzero exit code from the TeX run).
+  \@@vfuzz\z@
+  \setbox\z@\vbox to\z@{\box\@outputbox}%
+  \setbox\z@\box\voidb@x
+  \global \@colht \textheight
+  \stepcounter{page}%
+  \let\firstmark\botmark
+}
+\AtBeginDocument{\def\@outputpage{\showpagebox}}
+\if\wcQUIET\else
+\begingroup \def\msg^^J#1]^^J{\endgroup\message{#1]^^J^^J}}
+\endlinechar=`\^^J \catcode`\ =12 \msg
+
+The 'wordcount' utility provides a way of estimating the number of
+words in a LaTeX document.
+
+[Warning: The counting method uses a large log file as an intermediate
+step. If your disk space is extremely low the counting process
+may end prematurely for lack of space.]
+
+\fi
+
+% \typein has extraneous blank lines and slightly idiosyncratic prompt.
+\begingroup \endlinechar=-1
+\message{File name [press RETURN to cancel]: }
+\def\do{%
+  \let\do\@makeother \dospecials
+  \global\read-1 to\wcFileName
+  \endgroup
+}
+\do
+
+\ifx\@empty\wcFileName
+  \typeout{No file name given; quitting.}\expandafter\@@end\fi
+
+\expandafter\filename@parse\expandafter{\wcFileName}
+\edef\jobname{\filename@base}
+
+\if\wcQUIET
+  \message{\wcFileName}
+\else
+\typeout{^^JTo get a count of characters, run^^J^^J \space
+%
+  grep -c '3[.]0863[23]' wordcount.log^^J^^J%
+%
+or equivalent when processing is finished.^^J%
+}
+\fi
+
+\typeout{Processing \wcFileName...^^J}
+
+\IfFileExists{\wcFileName}{\batchmode}{\nonstopmode}
+\edef\@tempa{\noexpand\makeatother
+  \noexpand\input{\wcFileName}\noexpand\stop
+}
+\@tempa
+"""
+
 def is_first_line(line):
     if line.strip() == '':
         return False
@@ -42,7 +236,7 @@ def is_first_line(line):
         return False
     return True
 
-def count_main_text_words(detex_lines, tex_lines):
+def count_main_text_words_detex(detex_lines, tex_lines):
     # remove images and empty lines
     detex_lines = [line for line in detex_lines if len(line.strip()) > 0]
     detex_lines = [line for line in detex_lines if '<Picture' not in line]
@@ -61,20 +255,79 @@ def count_main_text_words(detex_lines, tex_lines):
 
     main_text = detex_lines[detex_first_line_no:]
 
-    print 'START main text'
-    print '\n'.join(main_text)
-    print 'END main text'
-
     main_text = [line.replace('-', ' ') for line in main_text ] # hyphenated words count as two words
     lines_words = [line.split() for line in main_text]
     words = [word for words in lines_words for word in words ]
 
-    words_file = open('words', 'w')
-    words_file.writelines([word+'\n' for word in words])
-    words_file.close()
+    #words_file = open('words', 'w')
+    #words_file.writelines([word+'\n' for word in words])
+    #words_file.close()
+    
     main_text_words = len(words)
     return main_text_words
 
+def count_main_text_words_wordcount(tex_lines, opts):
+    """
+    Count words in main text following method described at
+    
+    http://journals.aps.org/authors/length-guide-faq
+    """
+
+    mod_tex_lines = tex_lines[:]
+
+    # Commenting out the \maketitle command
+    mod_tex_lines = [ line.replace(r'\maketitle', r'%\maketitle') for line in mod_tex_lines ]
+    
+    # Using the 'nofootinbib' option
+    mod_tex_lines = [ line.replace(r'\documentclass[', r'\documentclass[nofootbib, ')
+                                    for line in mod_tex_lines ]
+    # Putting an \end{document} before the bibliography
+    bib_index = [ i for (i, line) in enumerate(mod_tex_lines) if r'\bibliography' in line]
+    if bib_index:
+        mod_tex_lines.insert(bib_index[0], r'\end{document}' + '\n')
+    
+    # Comment out any display equations
+    # Commenting out the acknowledgment
+    filterenvs = ['equation', 'eqnarray', 'align', 'displaymath', 'acknowledgments']
+    filtered_lines = []
+    while mod_tex_lines:
+        line = mod_tex_lines.pop(0)
+        for env in filterenvs:
+            if r'\begin{%s' % env in line:
+                while mod_tex_lines and not r'\end{%s}' % env in line:
+                    line = '% ' + line
+                    filtered_lines.append(line)
+                    line = mod_tex_lines.pop(0)
+                line = '% ' + line
+                filtered_lines.append(line)
+                line = mod_tex_lines.pop(0) # comment out the \end too
+        filtered_lines.append(line)
+
+    mod_tex_lines = filtered_lines
+
+    # FIXME - Commenting out the rows (but not the caption) of any tables
+
+    tmp_tex_file = open('tmp_tex_file.tex', 'w')
+    tmp_tex_file.writelines(line for line in mod_tex_lines)
+    tmp_tex_file.close()
+    
+    wordcount_tex_file = open('wordcount.tex', 'w')
+    wordcount_tex_file.write(wordcount_tex_contents)
+    wordcount_tex_file.close()
+
+    os.system('%s tmp_tex_file > /dev/null 2>&1' % opts.latex)
+    os.system('bibtex tmp_tex_file > /dev/null 2>&1')
+    os.system('%s tmp_tex_file > /dev/null 2>&1' % opts.latex)
+    os.system('%s tmp_tex_file > /dev/null 2>&1' % opts.latex)
+    os.system(r'echo tmp_tex_file.tex | %s wordcount.tex > /dev/null 2>&1' % opts.latex)
+    wordcount_log = open('wordcount.log').readlines()
+
+    rm_files = glob.glob('wordcount*') + glob.glob('tmp_tex_file*')
+    for file in rm_files:
+        os.unlink(file)
+
+    wordcount = len([line for line in wordcount_log if '3.08633' in line or '3.08635' in line])
+    return wordcount
 
 def find_equation_lines(tex_lines):
     return [i for (i, line) in enumerate(tex_lines) if (r'\begin{equation' in line or
@@ -217,7 +470,8 @@ def count_figures_words(detex_lines, tex_lines, opts):
                                                                       aspect, filename)
         fig_words.append(words_equiv)
             
-    return sum(fig_words)
+    return int(sum(fig_words)*opts.scale_figs)
+
 
 def process(tex_file, opts):
     print 'Processing TeX file: %s\n' % tex_file
@@ -227,8 +481,12 @@ def process(tex_file, opts):
     detex_lines = out.strip().split('\n')
 
     tex_lines = open(tex_file).readlines()
-
-    main_text_words = count_main_text_words(detex_lines, tex_lines)
+    if opts.method == 'detex':
+        main_text_words = count_main_text_words_detex(detex_lines, tex_lines)
+    elif opts.method == 'wordcount':
+        main_text_words = count_main_text_words_wordcount(tex_lines, opts)
+    else:
+        raise ValueError('Unsupported method %s' % opts.method)
     eqn_words = count_equations_words(tex_lines)
     fig_words = count_figures_words(detex_lines, tex_lines, opts)
     table_words = count_tables_words(tex_lines)
@@ -262,12 +520,19 @@ parser.add_option('-v', '--var', metavar='key value', nargs=2, action='append',
 parser.add_option('-e', '--env', metavar='env1,env2,...',
                 help='Comma-separated list of LaTeX environments to ignore.',
                 default='abstract,acknowledgements,displaymath,equation,eqnarray')
+parser.add_option('-m', '--method', metavar='(detex | wordcount)', default='wordcount',
+                  help='''Tool to use to count words in main text. Default is wordcount,
+                  detex is also supported (but tends to underestimate word count).''')
 parser.add_option('-f', '--figs', metavar='(identify | gs)',
                   help='''Tool to use to extract bounding box from figure.
                   Default is gs, ImageMagick identify also supported.''',
                   default='gs')
+parser.add_option('--scale-figs', type=float, default=1.1,
+                  help='Scale estimate of figure word counts by factor, default 1.1 (10%)')
 parser.add_option('-j', '--journal', metavar='PRL', default='PRL',
                   help='Journal abbreviation (e.g. PRL, PRB-RC)')
+parser.add_option('-l', '--latex', default='pdflatex',
+                  help='Latex executable. Default is "pdflatex".')
 
            
 opts, args = parser.parse_args()
