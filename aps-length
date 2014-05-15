@@ -272,7 +272,6 @@ def count_main_text_words_wordcount(tex_lines, opts):
     
     http://journals.aps.org/authors/length-guide-faq
     """
-
     mod_tex_lines = tex_lines[:]
 
     # Commenting out the \maketitle command
@@ -521,11 +520,11 @@ parser.add_option('-e', '--env', metavar='env1,env2,...',
                 help='Comma-separated list of LaTeX environments to ignore.',
                 default='abstract,acknowledgements,displaymath,equation,eqnarray')
 parser.add_option('-m', '--method', metavar='(detex | wordcount)', default='wordcount',
-                  help='''Tool to use to count words in main text. Default is wordcount,
-                  detex is also supported (but tends to underestimate word count).''')
+                  help='''Tool to use to count words in main text. Default is wordcount.
+detex is also supported (but tends to underestimate word count).''')
 parser.add_option('-f', '--figs', metavar='(identify | gs)',
                   help='''Tool to use to extract bounding box from figure.
-                  Default is gs, ImageMagick identify also supported.''',
+Default is gs, ImageMagick identify also supported.''',
                   default='gs')
 parser.add_option('--scale-figs', type=float, default=1.1,
                   help='Scale estimate of figure word counts by factor, default 1.1 (10%)')
