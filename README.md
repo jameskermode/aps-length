@@ -12,24 +12,24 @@ Requires _detex_ (http://www.ctan.org/pkg/detex) and either
 _ghostscript_ (http://www.ghostscript.com/) or ImageMagick _identify_
 (http://www.imagemagick.org) to be available on your path.
 
-Options:
-  -h, --help            show this help message and exit
-  -v key value, --var=key value
-                        Define TeX variables e.g. to specify location of
-                        figure files.
-  -e env1,env2,..., --env=env1,env2,...
-                        Comma-separated list of LaTeX environments to ignore.
-  -m (detex | wordcount), --method=(detex | wordcount)
-                        Tool to use to count words in main text. Default is
-                        wordcount, detex is also supported
-                        (but tends to underestimate word count).
-  -f (identify | gs), --figs=(identify | gs)
-                        Tool to use to extract bounding box from figure.
-                        Default is gs, ImageMagick identify also supported.
-  --scale-figs=SCALE_FIGS
-                        Scale estimate of figure word counts by factor,
-                        default 1.1 (10%)
-  -j PRL, --journal=PRL
-                        Journal abbreviation (e.g. PRL, PRB-RC)
-  -l LATEX, --latex=LATEX
-                        Latex executable. Default is "pdflatex".
+    Options:
+      -h, --help            show this help message and exit
+      -v key value, --var=key value
+                            Define TeX variables e.g. to specify location of
+                            figure files.
+      -e env1,env2,..., --env=env1,env2,...
+                            Comma-separated list of LaTeX environments to ignore.
+      -m (detex | wordcount), --method=(detex | wordcount)
+                            Tool to use to count words in main text. Default is
+                            wordcount, detex is also supported
+                            (but tends to underestimate word count).
+      -f (identify | gs), --figs=(identify | gs)
+                            Tool to use to extract bounding box from figure.
+                            Default is gs, ImageMagick identify also supported.
+      --scale-figs=SCALE_FIGS
+                            Scale estimate of figure word counts by factor,
+                            default 1.1 (10%)
+      -j PRL, --journal=PRL
+                            Journal abbreviation (e.g. PRL, PRB-RC)
+      -l LATEX, --latex=LATEX
+                            Latex executable. Default is "pdflatex".
