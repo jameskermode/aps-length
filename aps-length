@@ -60,7 +60,19 @@ def count_main_text_words(detex_lines, tex_lines):
         detex_first_line_no += 1
 
     main_text = detex_lines[detex_first_line_no:]
-    main_text_words = sum(len(line.split()) for line in main_text)
+
+    print 'START main text'
+    print '\n'.join(main_text)
+    print 'END main text'
+
+    main_text = [line.replace('-', ' ') for line in main_text ] # hyphenated words count as two words
+    lines_words = [line.split() for line in main_text]
+    words = [word for words in lines_words for word in words ]
+
+    words_file = open('words', 'w')
+    words_file.writelines([word+'\n' for word in words])
+    words_file.close()
+    main_text_words = len(words)
     return main_text_words
 
 
@@ -72,6 +84,7 @@ def find_equation_lines(tex_lines):
 def count_equation_words(lines, start_line):
     count = 1
     array = False
+    array_lines = 0
     two_column = '*' in lines[start_line]
     if two_column:
         eqn_words_per_line = 32
@@ -84,12 +97,19 @@ def count_equation_words(lines, start_line):
             r'\end{align' in line or
             r'\end{displaymath' in line):
             break
-        if r'\\' in line and not array:
-            count += 1
+        if r'\\' in line:
+            if not array:
+                count += 1
+            else:
+                array_lines += 1
         if r'\begin{array}' in line:
             array = True
+            array_lines = 0            
         if r'\end{array}' in line:
             array = False
+
+    if array_lines != 0:
+        count *= array_lines
             
     return count*eqn_words_per_line
 
