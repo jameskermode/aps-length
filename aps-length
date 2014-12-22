@@ -281,13 +281,19 @@ def count_main_text_words_wordcount(tex_lines, opts):
     mod_tex_lines = [ line.replace(r'\documentclass[', r'\documentclass[nofootbib, ')
                                     for line in mod_tex_lines ]
     # Putting an \end{document} before the bibliography
-    bib_index = [ i for (i, line) in enumerate(mod_tex_lines) if r'\bibliography' in line]
+    bib_index = [ i for (i, line) in enumerate(mod_tex_lines) if r'\bibliography{' in line]
     if bib_index:
         mod_tex_lines.insert(bib_index[0], r'\end{document}' + '\n')
+
+    # Putting an \end{document} before the acknowledgments/acknowledgements in environment \acknowledgments{...}
+    ack_index = [ i for (i, line) in enumerate(mod_tex_lines) if r'\acknowle' in line]
+    if ack_index:
+        mod_tex_lines.insert(ack_index[0], r'\end{document}' + '\n')
+
     
-    # Comment out any display equations
-    # Commenting out the acknowledgment
-    filterenvs = ['equation', 'eqnarray', 'align', 'displaymath', 'acknowledgments']
+    # Comment out any display equations and acknowledgments
+    filterenvs = ['equation', 'eqnarray', 'align', 'displaymath', 'acknowledgments',
+                  'acknowledgements', 'abstract', 'thebibliography']
     filtered_lines = []
     while mod_tex_lines:
         line = mod_tex_lines.pop(0)
@@ -518,7 +524,7 @@ parser.add_option('-v', '--var', metavar='key value', nargs=2, action='append',
                 help='Define TeX variables e.g. to specify location of figure files.')
 parser.add_option('-e', '--env', metavar='env1,env2,...',
                 help='Comma-separated list of LaTeX environments to ignore.',
-                default='abstract,acknowledgments,displaymath,equation,eqnarray')
+                default='abstract,acknowledgments,acknowledgements,displaymath,equation,eqnarray,thebibliography')
 parser.add_option('-m', '--method', metavar='(detex | wordcount)', default='wordcount',
                   help='''Tool to use to count words in main text. Default is wordcount.
 detex is also supported (but tends to underestimate word count).''')
@@ -536,5 +542,11 @@ parser.add_option('-l', '--latex', default='pdflatex',
            
 opts, args = parser.parse_args()
 
+orig_eps_pdf_files = glob.glob('*-eps-converted-to.pdf')
+
 for tex_file in args:
     process(tex_file, opts)
+
+for eps_pdf_file in glob.glob('*-eps-converted-to.pdf'):
+    if eps_pdf_file not in orig_eps_pdf_files:
+        os.remove(delname)
