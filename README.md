@@ -12,6 +12,9 @@ Requires _detex_ (http://www.ctan.org/pkg/detex) and either
 _ghostscript_ (http://www.ghostscript.com/) or ImageMagick _identify_
 (http://www.imagemagick.org) to be available on your path.
 
+Use --figs=gs if you have .eps or .pdf figures, and --figs=identify if you have
+.png figures.
+
     Options:
       -h, --help            show this help message and exit
       -v key value, --var=key value
@@ -26,6 +29,8 @@ _ghostscript_ (http://www.ghostscript.com/) or ImageMagick _identify_
       -f (identify | gs), --figs=(identify | gs)
                             Tool to use to extract bounding box from figure.
                             Default is gs, ImageMagick identify also supported.
+			    gs works with eps and pdf images, while
+			    identify is a better choice for png images.
       --scale-figs=SCALE_FIGS
                             Scale estimate of figure word counts by factor,
                             default 1.1 (10%)

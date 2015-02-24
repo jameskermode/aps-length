@@ -548,7 +548,8 @@ parser.add_option('-m', '--method', metavar='(detex | wordcount)', default='word
 detex is also supported (but tends to underestimate word count).''')
 parser.add_option('-f', '--figs', metavar='(identify | gs)',
                   help='''Tool to use to extract bounding box from figure.
-Default is gs, ImageMagick identify also supported.''',
+Default is gs, ImageMagick identify also supported. gs works with eps and pdf
+images, while identify is a better choice for png images.''',
                   default='gs')
 parser.add_option('--scale-figs', type=float, default=1.1,
                   help='Scale estimate of figure word counts by factor, default 1.1 (10%)')
