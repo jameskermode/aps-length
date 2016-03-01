@@ -146,9 +146,9 @@ wordcount_tex_contents = r"""\ProvidesFile{wordcount.tex}[2000/09/27 v1.5 Michae
 \font\ptmr=ptmr8t \relax
 \fontdimen22\ptmr=1sp % to permit use as math font 2
 \let\selectfont\relax
-\let\fontshape\@gobble \let\fontseries\@gobble \let\fontfamily\@gobble 
+\let\fontshape\@gobble \let\fontseries\@gobble \let\fontfamily\@gobble
 \let\fontencoding\@gobble \let\fontsize\@gobbletwo
-\let\linespread\@gobble 
+\let\linespread\@gobble
 \let\try@load@fontshape\relax
 \@namedef{U/msa/m/n}{}% disable special test in AMS documentclasses
 \def\define@newfont{\expandafter\let\font@name=\ptmr}
@@ -240,7 +240,7 @@ def count_main_text_words_detex(detex_lines, tex_lines):
     # remove images and empty lines
     detex_lines = [line for line in detex_lines if len(line.strip()) > 0]
     detex_lines = [line for line in detex_lines if '<Picture' not in line]
-    
+
     title_line_no, = [i for i, line in enumerate(tex_lines) if '\maketitle' in line]
     first_line_no = title_line_no + 1
     while not is_first_line(tex_lines[first_line_no]):
@@ -262,21 +262,21 @@ def count_main_text_words_detex(detex_lines, tex_lines):
     #words_file = open('words', 'w')
     #words_file.writelines([word+'\n' for word in words])
     #words_file.close()
-    
+
     main_text_words = len(words)
     return main_text_words
 
 def count_main_text_words_wordcount(tex_lines, opts):
     """
     Count words in main text following method described at
-    
+
     http://journals.aps.org/authors/length-guide-faq
     """
     mod_tex_lines = tex_lines[:]
 
     # Commenting out the \maketitle command
     mod_tex_lines = [ line.replace(r'\maketitle', r'%\maketitle') for line in mod_tex_lines ]
-    
+
     # Using the 'nofootinbib' option
     mod_tex_lines = [ line.replace(r'\documentclass[', r'\documentclass[nofootbib, ')
                                     for line in mod_tex_lines ]
@@ -290,7 +290,7 @@ def count_main_text_words_wordcount(tex_lines, opts):
     if ack_index:
         mod_tex_lines.insert(ack_index[0], r'\end{document}' + '\n')
 
-    
+
     # Comment out any display equations and acknowledgments
     filterenvs = ['equation', 'eqnarray', 'align', 'displaymath', 'acknowledgments',
                   'acknowledgements', 'abstract', 'thebibliography']
@@ -315,7 +315,7 @@ def count_main_text_words_wordcount(tex_lines, opts):
     tmp_tex_file = open('tmp_tex_file.tex', 'w')
     tmp_tex_file.writelines(line for line in mod_tex_lines)
     tmp_tex_file.close()
-    
+
     wordcount_tex_file = open('wordcount.tex', 'w')
     wordcount_tex_file.write(wordcount_tex_contents)
     wordcount_tex_file.close()
@@ -348,7 +348,7 @@ def count_equation_words(lines, start_line):
         eqn_words_per_line = 32
     else:
         eqn_words_per_line = 16
-        
+
     for line in lines[start_line+1:]:
         if (r'\end{equation' in line or
             r'\end{eqnarray' in line or
@@ -362,13 +362,13 @@ def count_equation_words(lines, start_line):
                 array_lines += 1
         if r'\begin{array}' in line:
             array = True
-            array_lines = 0            
+            array_lines = 0
         if r'\end{array}' in line:
             array = False
 
     if array_lines != 0:
         count *= array_lines
-            
+
     return count*eqn_words_per_line
 
 def count_equations_words(tex_lines):
@@ -407,16 +407,16 @@ def count_figures_words(detex_lines, tex_lines, opts):
         tex_vars = {}
     else:
         tex_vars = dict(opts.var)
-        
+
     fig_lines = [line for line in detex_lines if '<Picture' in line ]
     fig_words = []
     #figs = {}
-    
+
     for fig_i, fig_line in enumerate(fig_lines):
         filename = fig_line.strip()[1:-1].split()[1]
         this_fig_lines = [ (i, line) for i, line in enumerate(tex_lines) if filename in line and
                            ('input' in line or 'includegraphics' in line)]
-        (inc_fig_line_no, inc_fig_line), = this_fig_lines
+        (inc_fig_line_no, inc_fig_line) = this_fig_lines[0]
         fig_line_no = inc_fig_line_no
         while r'\begin{figure' not in tex_lines[fig_line_no]:
             fig_line_no -= 1
@@ -426,7 +426,7 @@ def count_figures_words(detex_lines, tex_lines, opts):
         newline = r'\\' in tex_lines[inc_fig_line_no]
 
         #print filename, tex_lines[inc_fig_line_no], tex_lines[fig_line_no]
-        
+
         for key in tex_vars.keys():
             if key in filename:
                 filename = filename.replace(key, tex_vars[key])
@@ -464,17 +464,17 @@ def count_figures_words(detex_lines, tex_lines, opts):
         #    figs[fig_line_no][2].append((width, height, newline, filename))
 
         aspect = float(width/height)
-            
+
         if two_column:
             words_equiv = 300./(0.5*aspect) + 40.
         else:
             words_equiv = 150./aspect + 20.
-        
+
         print 'Figure %d:   %6d words (%.0fx%.0f aspect %.2f, %s)' % (fig_i+1, int(words_equiv),
                                                                       width, height,
                                                                       aspect, filename)
         fig_words.append(words_equiv)
-            
+
     return int(sum(fig_words)*opts.scale_figs)
 
 
@@ -558,7 +558,7 @@ parser.add_option('-j', '--journal', metavar='PRL', default='PRL',
 parser.add_option('-l', '--latex', default='pdflatex',
                   help='Latex executable. Default is "pdflatex".')
 
-           
+
 opts, args = parser.parse_args()
 
 orig_eps_pdf_files = glob.glob('*-eps-converted-to.pdf')
