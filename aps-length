@@ -482,7 +482,7 @@ def count_chars_abstract(tex_lines):
     abs_begin_line, = [i for (i,line) in enumerate(tex_lines) if r'\begin{abstract}' in line]
     abs_end_line, = [i for (i,line) in enumerate(tex_lines) if r'\end{abstract}' in line]
 
-    abstract_lines = tex_lines[abs_begin_line+1:abs_end_line-1]
+    abstract_lines = tex_lines[abs_begin_line+1:abs_end_line]
     abstract_lines = [line for line in abstract_lines if not line.startswith('%') ]
     abstract = ''.join(abstract_lines)
     print 'ABSTRACT:'
