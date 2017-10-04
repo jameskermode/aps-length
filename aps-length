@@ -27,14 +27,16 @@ import os
 import sys
 import subprocess
 
-word_limit = {'PRL': 3500,
-              'PRA-RC': 3500,
+word_limit = {'PRL':    3750,
+              'PRA-RC': 4500,
               'PRB-RC': 3500,
               'PRC-RC': 4500,
-              'PRD-RC': 4000,
-              'PRE-RC': 3500,
+              'PRD-RC': 4500,
+              'PRE-RC': 4500,
               'PRApplied': 3500,
-              'PRST-PER': 3500}
+              'PRST-PER':  3500}
+# word limits from: https://journals.aps.org/authors/length-guide
+# updated 2017-10-03
 
 wordcount_tex_contents = r"""\ProvidesFile{wordcount.tex}[2000/09/27 v1.5 Michael Downes]
 % Copyright 2000 Michael John Downes
@@ -548,9 +550,9 @@ parser.add_option('-m', '--method', metavar='(detex | wordcount)', default='word
 detex is also supported (but tends to underestimate word count).''')
 parser.add_option('-f', '--figs', metavar='(identify | gs)',
                   help='''Tool to use to extract bounding box from figure.
-Default is gs, ImageMagick identify also supported. gs works with eps and pdf
-images, while identify is a better choice for png images.''',
-                  default='gs')
+The default is identify, which works for png, pdf, eps, and most image formats, but requires 
+ImageMagick to be installed. The other option is gs, which works with eps and pdf mages.''',
+                  default='identify')
 parser.add_option('--scale-figs', type=float, default=1.1,
                   help='Scale estimate of figure word counts by factor, default 1.1 (10%)')
 parser.add_option('-j', '--journal', metavar='PRL', default='PRL',
