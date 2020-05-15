@@ -251,7 +251,7 @@ def count_main_text_words_detex(detex_lines, tex_lines):
 
     detex_first_line_no = 0
     for line in detex_lines:
-        if line.strip() == first_line.strip():
+        if line.strip() in first_line.strip():
             break
         detex_first_line_no += 1
 
