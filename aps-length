@@ -26,6 +26,7 @@ import optparse
 import os
 import sys
 import subprocess
+import re
 
 word_limit = {'PRL':    3750,
               'PRA-RC': 4500,
@@ -410,12 +411,16 @@ def count_figures_words(detex_lines, tex_lines, opts):
     else:
         tex_vars = dict(opts.var)
 
-    fig_lines = [line for line in detex_lines if '<Picture' in line ]
+    # fig_lines = [line for line in detex_lines if '<Picture' in line ]
+    fig_lines = [line for line in tex_lines if 'includegraphics' in line ]
     fig_words = []
     #figs = {}
 
     for fig_i, fig_line in enumerate(fig_lines):
-        filename = fig_line.strip()[1:-1].split()[1]
+        # filename = fig_line.strip()[1:-1].split()[1]
+        m = re.findall(r"{\S*\.pdf}|.eps}|.png}$", fig_line)
+        filename = m[0][1:-1]
+
         this_fig_lines = [ (i, line) for i, line in enumerate(tex_lines) if filename in line and
                            ('input' in line or 'includegraphics' in line)]
         (inc_fig_line_no, inc_fig_line) = this_fig_lines[0]
@@ -427,7 +432,7 @@ def count_figures_words(detex_lines, tex_lines, opts):
         subfig = 'subfloat' in tex_lines[inc_fig_line_no]
         newline = r'\\' in tex_lines[inc_fig_line_no]
 
-        #print filename, tex_lines[inc_fig_line_no], tex_lines[fig_line_no]
+        print filename, tex_lines[inc_fig_line_no], tex_lines[fig_line_no]
 
         for key in tex_vars.keys():
             if key in filename:
@@ -550,7 +555,7 @@ parser.add_option('-m', '--method', metavar='(detex | wordcount)', default='word
 detex is also supported (but tends to underestimate word count).''')
 parser.add_option('-f', '--figs', metavar='(identify | gs)',
                   help='''Tool to use to extract bounding box from figure.
-The default is identify, which works for png, pdf, eps, and most image formats, but requires 
+The default is identify, which works for png, pdf, eps, and most image formats, but requires
 ImageMagick to be installed. The other option is gs, which works with eps and pdf mages.''',
                   default='identify')
 parser.add_option('--scale-figs', type=float, default=1.1,
