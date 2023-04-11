@@ -446,12 +446,13 @@ def count_figures_words(detex_lines, tex_lines, opts):
         filename = filename+ext
 
         if opts.figs == 'identify':
-            identify = subprocess.Popen(['identify', filename],
+            identify = subprocess.Popen(['identify', '-verbose', filename],
                                         stdout=subprocess.PIPE)
             out, err = identify.communicate()
             out = out.decode()
             fields = out.split()
-            width, height = fields[2].split('x')
+            dummy_index = fields.index('size:')
+            width, height = fields[dummy_index+1].split('x')
             width = float(width)
             height = float(height)
         elif opts.figs == 'gs':
