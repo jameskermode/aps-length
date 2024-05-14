@@ -27,6 +27,7 @@ import os
 import sys
 import subprocess
 import re
+import fitz
 
 word_limit = {'PRL':    3750,
               'PRA-RC': 4500,
@@ -244,7 +245,7 @@ def count_main_text_words_detex(detex_lines, tex_lines):
     detex_lines = [line for line in detex_lines if len(line.strip()) > 0]
     detex_lines = [line for line in detex_lines if '<Picture' not in line]
 
-    title_line_no, = [i for i, line in enumerate(tex_lines) if '\maketitle' in line]
+    title_line_no, = [i for i, line in enumerate(tex_lines) if '\\maketitle' in line]
     first_line_no = title_line_no + 1
     while not is_first_line(tex_lines[first_line_no]):
         first_line_no += 1
@@ -446,7 +447,12 @@ def count_figures_words(detex_lines, tex_lines, opts):
             raise IOError('missing picture file %s' % filename)
         filename = filename+ext
 
-        if opts.figs == 'identify':
+        if filename[-4:] == '.pdf':
+            pdf_file = fitz.open(filename)
+            first_page = pdf_file[0]
+            width = first_page.rect.width
+            height = first_page.rect.height
+        elif opts.figs == 'identify':
             identify = subprocess.Popen(['identify', '-verbose', filename],
                                         stdout=subprocess.PIPE)
             out, err = identify.communicate()

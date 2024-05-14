@@ -8,6 +8,9 @@ Usage: aps-length [options] tex-files
 Count number of equivalent words in an APS manuscript formatted in
 LaTeX, following guidelines described at http://journals.aps.org/authors/length-guide
 
+Requires PyMuPDF to be installed (`python3 -m pip install PyMuPDF`) for pdf figures.
+Note that PyMuPDF is more accurate than gs and identify for pdf figures.
+
 Requires _detex_ (http://www.ctan.org/pkg/detex) and either
 _ghostscript_ (http://www.ghostscript.com/) or ImageMagick _identify_
 (http://www.imagemagick.org) to be available on your path.
