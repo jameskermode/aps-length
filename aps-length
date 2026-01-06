@@ -324,11 +324,19 @@ def count_main_text_words_wordcount(tex_lines, opts):
     wordcount_tex_file.write(wordcount_tex_contents)
     wordcount_tex_file.close()
 
-    os.system('%s tmp_tex_file > /dev/null 2>&1' % opts.latex)
-    os.system('bibtex tmp_tex_file > /dev/null 2>&1')
-    os.system('%s tmp_tex_file > /dev/null 2>&1' % opts.latex)
-    os.system('%s tmp_tex_file > /dev/null 2>&1' % opts.latex)
-    os.system(r'echo tmp_tex_file.tex | %s wordcount.tex > /dev/null 2>&1' % opts.latex)
+    def run_cmd(cmd):
+        if opts.verbose:
+            print(f"Running: {cmd}")
+            os.system(cmd)
+        else:
+            os.system(f"{cmd} > /dev/null 2>&1")
+    
+    run_cmd(f"{opts.latex} tmp_tex_file")
+    run_cmd("bibtex tmp_tex_file")
+    run_cmd(f"{opts.latex} tmp_tex_file")
+    run_cmd(f"{opts.latex} tmp_tex_file")
+    run_cmd(r"echo tmp_tex_file.tex | {} wordcount.tex".format(opts.latex))
+    
     wordcount_log = open('wordcount.log', encoding="latin-1").readlines()
 
     rm_files = glob.glob('wordcount*') + glob.glob('tmp_tex_file*')
@@ -574,7 +582,8 @@ parser.add_option('-j', '--journal', metavar='PRL', default='PRL',
                   help='Journal abbreviation (e.g. PRL, PRB-RC)')
 parser.add_option('-l', '--latex', default='pdflatex',
                   help='Latex executable. Default is "pdflatex".')
-
+parser.add_option('--verbose', action='store_true', dest='verbose', default=False,
+                  help='Enable verbose latex output')
 
 opts, args = parser.parse_args()
 
